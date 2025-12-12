@@ -31,13 +31,18 @@ class SceneSelect extends FlxState
 			if (FileSystem.isDirectory('scenes/$folder'))
 				if (FileSystem.exists('scenes/$folder/scene.json'))
 				{
-					var sceneJsonFile:SceneJSON = Json.parse(File.getContent('scenes/$folder/scene.json'));
-					var apiVer:Version = Version.stringToVersion(sceneJsonFile.api);
+					try
+					{
+						var sceneJsonFile:SceneJSON = Json.parse(File.getContent('scenes/$folder/scene.json'));
+						sceneJsonFile.folder = folder;
+						var apiVer:Version = Version.stringToVersion(sceneJsonFile.api);
 
-					if (apiVer.satisfies(sceneAPIVer))
-						scenes.push(sceneJsonFile);
-					else
-						trace('Unsupported scene: ' + sceneJsonFile.name);
+						if (apiVer.satisfies(sceneAPIVer))
+							scenes.push(sceneJsonFile);
+						else
+							trace('Unsupported scene: ' + sceneJsonFile.name);
+					}
+					catch (_) {}
 				}
 		}
 
@@ -72,6 +77,17 @@ class SceneSelect extends FlxState
 				camFollow.y = sceneText.y;
 				sceneText.color = FlxColor.YELLOW;
 			}
+		}
+
+		if (FlxG.keys.anyJustReleased([UP, W, DOWN, S, ENTER]))
+		{
+			if (FlxG.keys.anyJustReleased([UP, W]))
+				currentSelected = (currentSelected - 1 + scenesText.members.length) % scenesText.members.length;
+			if (FlxG.keys.anyJustReleased([DOWN, S]))
+				currentSelected = (currentSelected + 1) % scenesText.members.length;
+
+			if (FlxG.keys.anyJustReleased([ENTER]))
+				FlxG.switchState(() -> new ScenePlayer(scenes[currentSelected].folder));
 		}
 	}
 }
