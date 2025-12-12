@@ -1,5 +1,8 @@
 package;
 
+import thx.semver.Version;
+import sys.io.File;
+import haxe.Json;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.text.FlxText;
@@ -9,8 +12,10 @@ import sys.FileSystem;
 
 class SceneSelect extends FlxState
 {
-	public var scenes:Array<String> = [];
+	public var scenes:Array<SceneJSON> = [];
 	public var scenesText:FlxTypedGroup<FlxText>;
+
+	public var sceneAPIVer:String = '>=1.0.0 <2.0.0';
 
 	public var camFollow:FlxObject;
 
@@ -22,8 +27,17 @@ class SceneSelect extends FlxState
 
 		for (folder in FileSystem.readDirectory('scenes/'))
 		{
-			if (FileSystem.isDirectory('scenes/$scenes'))
-				scenes.push(folder);
+			if (FileSystem.isDirectory('scenes/$folder'))
+				if (FileSystem.exists('scenes/$folder/scene.json'))
+				{
+					var sceneJsonFile:SceneJSON = Json.parse(File.getContent('scenes/$folder/scene.json'));
+					var apiVer:Version = Version.stringToVersion(sceneJsonFile.api);
+
+					if (apiVer.satisfies(sceneAPIVer))
+						scenes.push(sceneJsonFile);
+					else
+						trace('Unsupported scene: ' + sceneJsonFile.name);
+				}
 		}
 
 		scenesText = new FlxTypedGroup<FlxText>();
@@ -32,7 +46,7 @@ class SceneSelect extends FlxState
 		var i = 0;
 		for (scene in scenes)
 		{
-			var sceneText:FlxText = new FlxText(0, i * 48, 0, scene, 16);
+			var sceneText:FlxText = new FlxText(0, i * 48, 0, scene.name, 16);
 			sceneText.ID = i;
 			scenesText.add(sceneText);
 			i++;
