@@ -55,6 +55,8 @@ class SceneSelect extends FlxState
 		camFollow = new FlxObject();
 		add(camFollow);
 		camFollow.x = FlxG.width / 2;
+
+		FlxG.camera.follow(camFollow, LOCKON, 0.5);
 	}
 
 	override public function update(elapsed:Float)
