@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxColor;
 import thx.semver.Version;
 import sys.io.File;
 import haxe.Json;
@@ -65,8 +66,12 @@ class SceneSelect extends FlxState
 
 		for (sceneText in scenesText)
 		{
+			sceneText.color = FlxColor.WHITE;
 			if (currentSelected == sceneText.ID)
+			{
 				camFollow.y = sceneText.y;
+				sceneText.color = FlxColor.YELLOW;
+			}
 		}
 	}
 }
